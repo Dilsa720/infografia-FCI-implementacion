@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Infografía interactiva del proyecto de implementación de la operación farmacéutica de FCI Logistics.">
+  <meta name="theme-color" content="#071521">
+  <title>FCI Logistics | Operación Farmacéutica</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#071521",
+            navy: "#0B2030",
+            panel: "#102B3A",
+            cyanx: "#22D3EE",
+            mint: "#34D399",
+            amberx: "#FBBF24",
+            coral: "#FB7185"
+          },
+          boxShadow: {
+            glow: "0 0 45px rgba(34,211,238,.14)",
+            mint: "0 0 40px rgba(52,211,153,.14)"
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --cyan: #22d3ee;
+      --mint: #34d399;
+      --amber: #fbbf24;
+      --coral: #fb7185;
+      --ink: #071521;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--ink);
+    }
+
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 10% 5%, rgba(34,211,238,.12), transparent 25rem),
+        radial-gradient(circle at 90% 25%, rgba(52,211,153,.09), transparent 28rem),
+        linear-gradient(180deg, #071521 0%, #091c2a 48%, #071521 100%);
+      color: #e6f7fb;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    ::selection {
+      background: rgba(34,211,238,.35);
+      color: white;
+    }
+
+    .glass {
+      background: linear-gradient(145deg, rgba(16,43,58,.88), rgba(8,28,41,.74));
+      border: 1px solid rgba(148,213,226,.15);
+      box-shadow: 0 24px 70px rgba(0,0,0,.24);
+      backdrop-filter: blur(16px);
+    }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .section-reveal {
+      opacity: 0;
+      transform: translateY(46px);
+      transition: opacity .8s ease, transform .8s cubic-bezier(.2,.75,.25,1);
+    }
+
+    .section-reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bounce-item {
+      opacity: 0;
+      transform: translateY(45px) scale(.78);
+    }
+
+    .bounce-item.bounce-in {
+      animation: bounceIn .9s cubic-bezier(.2,.8,.2,1) forwards;
+      animation-delay: var(--delay, 0ms);
+    }
+
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: translateY(45px) scale(.78);
+      }
+      58% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1.035);
+      }
+      76% {
+        transform: translateY(5px) scale(.985);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .float {
+      animation: float 5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .pulse-ring {
+      animation: pulseRing 2.3s infinite;
+    }
+
+    @keyframes pulseRing {
+      0% { box-shadow: 0 0 0 0 rgba(34,211,238,.34); }
+      70% { box-shadow: 0 0 0 14px rgba(34,211,238,0); }
+      100% { box-shadow: 0 0 0 0 rgba(34,211,238,0); }
+    }
+
+    .flow-line::after {
+      content: "";
+      position: absolute;
+      top: 2.2rem;
+      bottom: -2.3rem;
+      left: 1.7rem;
+      width: 2px;
+      background: linear-gradient(to bottom, rgba(34,211,238,.7), rgba(52,211,153,.14));
+    }
+
+    .flow-line:last-child::after {
+      display: none;
+    }
+
+    .modal-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(34,211,238,.5) transparent;
+    }
+
+    .nav-link.active {
+      color: #67e8f9;
+      background: rgba(34,211,238,.1);
+      border-color: rgba(34,211,238,.25);
+    }
+
+    .warehouse-zone {
+      transition: transform .25s ease, filter .25s ease, opacity .25s ease;
+      cursor: pointer;
+    }
+
+    .warehouse-zone:hover,
+    .warehouse-zone:focus {
+      transform: translateY(-3px);
+      filter: brightness(1.15);
+      outline: none;
+    }
+
+    .warehouse-map:has(.warehouse-zone:hover) .warehouse-zone:not(:hover) {
+      opacity: .55;
+    }
+
+    .timeline-bar {
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 1.5s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .visible .timeline-bar {
+      transform: scaleX(1);
+    }
+
+    .metric-bar {
+      width: 0;
+      transition: width 1.4s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .visible .metric-bar {
+      width: var(--value);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+
+      .section-reveal,
+      .bounce-item {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="scrollProgress" class="fixed left-0 top-0 z-[90] h-1 bg-gradient-to-r from-cyan-400 via-emerald-400 to-amber-300" style="width:0%"></div>
+
+  <header class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-ink/80 backdrop-blur-xl">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+      <a href="#inicio" class="flex items-center gap-3" aria-label="Ir al inicio">
+        <div class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-cyan-400 to-emerald-400 font-black text-ink shadow-glow">
+          FCI
+        </div>
+
+        <div>
+          <p class="text-sm font-black leading-none text-white">Operación farmacéutica</p>
+          <p class="mt-1 text-[11px] uppercase tracking-[.22em] text-cyan-200/70">
+            Parque Sur · Panamá
+          </p>
+        </div>
+      </a>
+
+      <button id="menuButton" type="button" class="rounded-xl border border-white/10 bg-white/5 p-2 text-white lg:hidden" aria-label="Abrir navegación" aria-expanded="false">
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+
+      <nav class="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
+        <a class="nav-link rounded-lg border border-transparent px-3 py-2 text-xs font-bold text-slate-300" href="#alcance">Alcance</a>
+        <a class="nav-link rounded-lg border border-transparent px-3 py-2 text-xs font-bold text-slate-300" href="#proceso">Proceso</a>
+        <a class="nav-link rounded-lg border border-transparent px-3 py-2 text-xs font-bold text-slate-300" href="#infraestructura">Infraestructura</a>
+        <a class="nav-link rounded-lg border border-transparent px-3 py-2 text-xs font-bold text-slate-300" href="#estructura">Estructura</a>
+        <a class="nav-link rounded-lg border border-transparent px-3 py-2 text-xs font-bold text-slate-300" href="#calidad">Calidad</a>
+        <a class="nav-link rounded-lg border border-transparent px-3 py-2 text-xs font-bold text-slate-300" href="#implementacion">Implementación</a>
+      </nav>
+    </div>
+
+    <nav id="mobileNav" class="hidden border-t border-white/10 bg-ink/95 px-4 py-4 lg:hidden">
+      <div class="grid grid-cols-2 gap-2">
+        <a class="mobile-link rounded-xl bg-white/5 px-4 py-3 text-sm" href="#alcance">Alcance</a>
+        <a class="mobile-link rounded-xl bg-white/5 px-4 py-3 text-sm" href="#proceso">Proceso</a>
+        <a class="mobile-link rounded-xl bg-white/5 px-4 py-3 text-sm" href="#infraestructura">Infraestructura</a>
+        <a class="mobile-link rounded-xl bg-white/5 px-4 py-3 text-sm" href="#estructura">Estructura</a>
+        <a class="mobile-link rounded-xl bg-white/5 px-4 py-3 text-sm" href="#calidad">Calidad</a>
+        <a class="mobile-link rounded-xl bg-white/5 px-4 py-3 text-sm" href="#implementacion">Implementación</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section id="inicio" class="grid-bg relative flex min-h-screen items-center overflow-hidden px-4 pb-16 pt-28 sm:px-6">
+      <div class="pointer-events-none absolute -left-28 top-20 h-96 w-96 rounded-full bg-cyan-400/10 blur-3xl"></div>
+      <div class="pointer-events-none absolute -right-28 bottom-8 h-[28rem] w-[28rem] rounded-full bg-emerald-400/10 blur-3xl"></div>
+
+      <div class="relative mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-[1.05fr_.95fr]">
+        <div>
+          <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[.2em] text-cyan-200">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+            Proyecto de implementación
+          </div>
+
+          <h1 class="max-w-4xl text-4xl font-black leading-[1.04] tracking-tight text-white sm:text-6xl lg:text-7xl">
+            De una bodega logística a una
+            <span class="bg-gradient-to-r from-cyan-300 via-emerald-300 to-amber-200 bg-clip-text text-transparent">
+              operación farmacéutica controlada
+            </span>
+          </h1>
+
+          <p class="mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
+            Modelo inicial, regulado y escalable para el almacenamiento y distribución de medicamentos de terceros por FCI Logistics en Parque Sur, Panamá.
+          </p>
+
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a href="#alcance" class="pulse-ring inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-6 py-3.5 font-black text-ink hover:bg-cyan-300">
+              Explorar el proyecto
+              <span>↓</span>
+            </a>
+
+            <button type="button" data-modal="project" class="rounded-xl border border-white/15 bg-white/5 px-6 py-3.5 font-bold text-white hover:bg-white/10">
+              Ver ficha ejecutiva
+            </button>
+          </div>
+
+          <div class="mt-10 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
+            <div class="bounce-item glass rounded-xl p-4">
+              <p class="text-2xl font-black text-cyan-300" data-count="2">0</p>
+              <p class="mt-1 text-xs text-slate-400">Contenedores/mes</p>
+            </div>
+
+            <div class="bounce-item glass rounded-xl p-4" style="--delay:100ms">
+              <p class="text-2xl font-black text-emerald-300" data-count="5">0</p>
+              <p class="mt-1 text-xs text-slate-400">Pallets/día aprox.</p>
+            </div>
+
+            <div class="bounce-item glass rounded-xl p-4" style="--delay:200ms">
+              <p class="text-2xl font-black text-amber-200" data-count="5">0</p>
+              <p class="mt-1 text-xs text-slate-400">Pedidos/día</p>
+            </div>
+
+            <div class="bounce-item glass rounded-xl p-4" style="--delay:300ms">
+              <p class="text-2xl font-black text-rose-300" data-count="6">0</p>
+              <p class="mt-1 text-xs text-slate-400">Fases de inicio</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="float relative mx-auto w-full max-w-xl">
+          <div class="absolute inset-10 rounded-full bg-cyan-400/15 blur-3xl"></div>
+
+          <div class="glass relative overflow-hidden rounded-[2rem] p-5 shadow-glow sm:p-8">
+            <div class="mb-6 flex items-center justify-between">
+              <div>
+                <p class="text-xs uppercase tracking-[.2em] text-cyan-200/70">Sistema operativo</p>
+                <h2 class="mt-1 text-xl font-black text-white">Trazabilidad de extremo a extremo</h2>
+              </div>
+              <div class="grid h-12 w-12 place-items-center rounded-xl bg-emerald-400/15 text-2xl">✚</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div class="rounded-xl bg-cyan-400/10 p-4 text-center">
+                <span class="text-3xl">🚚</span>
+                <p class="mt-2 text-xs font-bold">Recepción</p>
+              </div>
+
+              <div class="rounded-xl bg-cyan-400/10 p-4 text-center">
+                <span class="text-3xl">🔎</span>
+                <p class="mt-2 text-xs font-bold">Inspección</p>
+              </div>
+
+              <div class="rounded-xl bg-amber-400/10 p-4 text-center">
+                <span class="text-3xl">⏸</span>
+                <p class="mt-2 text-xs font-bold">Cuarentena</p>
+              </div>
+
+              <div class="rounded-xl bg-emerald-400/10 p-4 text-center">
+                <span class="text-3xl">▦</span>
+                <p class="mt-2 text-xs font-bold">Almacenamiento</p>
+              </div>
+
+              <div class="rounded-xl bg-amber-400/10 p-4 text-center">
+                <span class="text-3xl">📦</span>
+                <p class="mt-2 text-xs font-bold">Picking FEFO</p>
+              </div>
+
+              <div class="rounded-xl bg-rose-400/10 p-4 text-center">
+                <span class="text-3xl">📍</span>
+                <p class="mt-2 text-xs font-bold">Entrega</p>
+              </div>
+            </div>
+
+            <button type="button" data-modal="traceability" class="mt-5 w-full rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-5 py-3 text-sm font-bold text-cyan-100 hover:bg-cyan-300/20">
+              Abrir datos de trazabilidad
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="alcance" class="section-reveal px-4 py-24 sm:px-6">
+      <div class="mx-auto max-w-7xl">
+        <div class="max-w-3xl">
+          <p class="text-sm font-black uppercase tracking-[.25em] text-cyan-300">01 · Alcance inicial</p>
+          <h2 class="mt-4 text-3xl font-black text-white sm:text-5xl">Comenzar pequeño, pero comenzar bajo control</h2>
+          <p class="mt-5 text-lg leading-8 text-slate-300">
+            El bajo volumen reduce la complejidad operativa, pero no elimina las obligaciones sanitarias.
+          </p>
+        </div>
+
+        <div class="mt-12 grid gap-6 lg:grid-cols-3">
+          <article class="bounce-item glass rounded-2xl p-6 shadow-glow">
+            <div class="flex items-center justify-between">
+              <span class="grid h-12 w-12 place-items-center rounded-xl bg-cyan-400/15 text-2xl">✓</span>
+              <span class="rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-300">FASE INICIAL</span>
+            </div>
+
+            <h3 class="mt-6 text-xl font-black text-white">Actividades incluidas</h3>
+
+            <ul class="mt-5 space-y-3 text-sm text-slate-300">
+              <li>Recepción de contenedores y carga suelta</li>
+              <li>Inspección física y documental</li>
+              <li>Cuarentena y almacenamiento autorizado</li>
+              <li>Inventarios por lote y vencimiento</li>
+              <li>Picking, verificación y despacho</li>
+              <li>Distribución local y devoluciones</li>
+            </ul>
+
+            <button type="button" data-modal="included" class="mt-6 w-full rounded-xl bg-cyan-400 px-4 py-3 text-sm font-black text-ink hover:bg-cyan-300">
+              Ver todas las actividades
+            </button>
+          </article>
+
+          <article class="bounce-item glass rounded-2xl p-6" style="--delay:130ms">
+            <div class="flex items-center justify-between">
+              <span class="grid h-12 w-12 place-items-center rounded-xl bg-rose-400/15 text-2xl">⛔</span>
+              <span class="rounded-full bg-rose-400/10 px-3 py-1 text-xs font-bold text-rose-300">POSTERIOR</span>
+            </div>
+
+            <h3 class="mt-6 text-xl font-black text-white">Fuera del alcance inicial</h3>
+
+            <ul class="mt-5 space-y-3 text-sm text-slate-300">
+              <li>Narcóticos, psicotrópicos y precursores</li>
+              <li>Medicamentos congelados</li>
+              <li>Reempaque, reetiquetado y fraccionamiento</li>
+              <li>Acondicionamiento y manufactura</li>
+              <li>Venta directa y dispensación</li>
+              <li>Destrucción dentro de la bodega</li>
+            </ul>
+
+            <button type="button" data-modal="excluded" class="mt-6 w-full rounded-xl border border-rose-300/20 bg-rose-300/10 px-4 py-3 text-sm font-bold text-rose-200 hover:bg-rose-300/20">
+              Revisar exclusiones
+            </button>
+          </article>
+
+          <article class="bounce-item glass rounded-2xl p-6 shadow-mint" style="--delay:260ms">
+            <div class="flex items-center justify-between">
+              <span class="grid h-12 w-12 place-items-center rounded-xl bg-emerald-400/15 text-2xl">❄</span>
+              <span class="rounded-full bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-200">AMPLIACIÓN</span>
+            </div>
+
+            <h3 class="mt-6 text-xl font-black text-white">Cadena de frío</h3>
+
+            <p class="mt-5 text-sm leading-7 text-slate-300">
+              Se incorporará después de disponer de infraestructura autorizada, calificación, mapeo térmico, alarmas, respaldo eléctrico y contingencias.
+            </p>
+
+            <div class="mt-6 rounded-xl bg-emerald-400/10 p-4">
+              <p class="text-3xl font-black text-emerald-300">2–8 °C</p>
+              <p class="mt-1 text-xs text-emerald-100/70">Rango típico sujeto a especificación del producto</p>
+            </div>
+
+            <button type="button" data-modal="coldchain" class="mt-6 w-full rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm font-bold text-emerald-200 hover:bg-emerald-300/20">
+              Ver requisitos técnicos
+            </button>
+          </article>
+        </div>
+
+        <div class="glass mt-8 grid gap-4 rounded-2xl p-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="bounce-item rounded-xl bg-white/5 p-5 text-center">
+            <p class="text-4xl font-black text-cyan-300" data-count="1">0</p>
+            <p class="mt-2 text-sm text-slate-400">Recepción de carga suelta/día</p>
+          </div>
+
+          <div class="bounce-item rounded-xl bg-white/5 p-5 text-center" style="--delay:100ms">
+            <p class="text-4xl font-black text-emerald-300" data-count="5">0</p>
+            <p class="mt-2 text-sm text-slate-400">Pallets por recepción</p>
+          </div>
+
+          <div class="bounce-item rounded-xl bg-white/5 p-5 text-center" style="--delay:200ms">
+            <p class="text-4xl font-black text-amber-200" data-count="5">0</p>
+            <p class="mt-2 text-sm text-slate-400">Pedidos diarios</p>
+          </div>
+
+          <div class="bounce-item rounded-xl bg-white/5 p-5 text-center" style="--delay:300ms">
+            <p class="text-4xl font-black text-rose-300" data-count="10">0</p>
+            <p class="mt-2 text-sm text-slate-400">Pedidos para reevaluar estructura</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="proceso" class="section-reveal border-y border-white/10 bg-white/[.025] px-4 py-24 sm:px-6">
+      <div class="mx-auto max-w-7xl">
+        <div class="grid gap-12 lg:grid-cols-[.78fr_1.22fr]">
+          <div class="lg:sticky lg:top-24 lg:self-start">
+            <p class="text-sm font-black uppercase tracking-[.25em] text-emerald-300">02 · Flujo operativo</p>
+            <h2 class="mt-4 text-3xl font-black text-white sm:text-5xl">El medicamento nunca pierde su identidad</h2>
+
+            <p class="mt-5 leading-8 text-slate-300">
+              Cada movimiento debe conservar la relación entre cliente, producto, lote, vencimiento, cantidad, estado, ubicación y responsable.
+            </p>
+
+            <div class="glass mt-8 rounded-2xl p-6">
+              <p class="text-sm font-bold uppercase tracking-[.2em] text-cyan-200/70">Regla crítica</p>
+              <p class="mt-3 text-xl font-black text-white">
+                Ningún producto bloqueado puede movilizarse, prepararse o despacharse.
+              </p>
+
+              <button type="button" data-modal="status" class="mt-5 rounded-xl bg-emerald-400 px-5 py-3 text-sm font-black text-ink hover:bg-emerald-300">
+                Explorar estados
+              </button>
+            </div>
+          </div>
+
+          <div id="processFlow" class="space-y-5"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="infraestructura" class="section-reveal px-4 py-24 sm:px-6">
+      <div class="mx-auto max-w-7xl">
+        <div class="max-w-3xl">
+          <p class="text-sm font-black uppercase tracking-[.25em] text-amber-200">03 · Infraestructura</p>
+          <h2 class="mt-4 text-3xl font-black text-white sm:text-5xl">Una zona para cada estado sanitario</h2>
+          <p class="mt-5 leading-8 text-slate-300">
+            La segregación física y el control de acceso previenen mezclas, errores de estado y liberaciones no autorizadas.
+          </p>
+        </div>
+
+        <div class="glass warehouse-map mt-12 rounded-3xl p-4 sm:p-7">
+          <div class="grid min-h-[560px] grid-cols-2 gap-3 sm:grid-cols-4 sm:grid-rows-4">
+            <button data-modal="zone-reception" class="warehouse-zone col-span-2 rounded-2xl border border-cyan-300/25 bg-cyan-400/15 p-5 text-left">
+              <span class="text-3xl">🚚</span>
+              <h3 class="mt-3 font-black text-cyan-100">Recepción e inspección</h3>
+              <p class="mt-2 text-xs leading-5 text-cyan-100/65">Vehículo, sellos, pallets, cajas y documentos.</p>
+            </button>
+
+            <button data-modal="zone-quarantine" class="warehouse-zone rounded-2xl border border-amber-300/25 bg-amber-400/15 p-5 text-left sm:row-span-2">
+              <span class="text-3xl">⏸</span>
+              <h3 class="mt-3 font-black text-amber-100">Cuarentena</h3>
+              <p class="mt-2 text-xs leading-5 text-amber-100/65">Sin uso hasta el cambio autorizado.</p>
+            </button>
+
+            <button data-modal="zone-rejected" class="warehouse-zone rounded-2xl border border-rose-300/25 bg-rose-400/15 p-5 text-left">
+              <span class="text-3xl">!</span>
+              <h3 class="mt-3 font-black text-rose-100">Rechazados</h3>
+              <p class="mt-2 text-xs leading-5 text-rose-100/65">Bloqueados y segregados.</p>
+            </button>
+
+            <button data-modal="zone-storage" class="warehouse-zone col-span-2 row-span-2 rounded-2xl border border-emerald-300/25 bg-emerald-400/15 p-6 text-left">
+              <span class="text-4xl">▦</span>
+              <h3 class="mt-3 text-xl font-black text-emerald-100">Almacenamiento disponible</h3>
+              <p class="mt-3 text-sm leading-6 text-emerald-100/65">
+                Racks identificados, FEFO, monitoreo ambiental y separación por cliente.
+              </p>
+
+              <div class="mt-5 flex flex-wrap gap-2">
+                <span class="rounded-full bg-black/20 px-3 py-1 text-xs">Lote</span>
+                <span class="rounded-full bg-black/20 px-3 py-1 text-xs">Vencimiento</span>
+                <span class="rounded-full bg-black/20 px-3 py-1 text-xs">Ubicación</span>
+                <span class="rounded-full bg-black/20 px-3 py-1 text-xs">Estado</span>
+              </div>
+            </button>
+
+            <button data-modal="zone-expired" class="warehouse-zone rounded-2xl border border-orange-300/25 bg-orange-400/15 p-5 text-left">
+              <span class="text-3xl">⌛</span>
+              <h3 class="mt-3 font-black text-orange-100">Vencidos</h3>
+              <p class="mt-2 text-xs leading-5 text-orange-100/65">Inventario inutilizable.</p>
+            </button>
+
+            <button data-modal="zone-returns" class="warehouse-zone rounded-2xl border border-violet-300/25 bg-violet-400/15 p-5 text-left">
+              <span class="text-3xl">↩</span>
+              <h3 class="mt-3 font-black text-violet-100">Devoluciones</h3>
+              <p class="mt-2 text-xs leading-5 text-violet-100/65">Evaluación antes del reintegro.</p>
+            </button>
+
+            <button data-modal="zone-picking" class="warehouse-zone col-span-2 rounded-2xl border border-sky-300/25 bg-sky-400/15 p-5 text-left">
+              <span class="text-3xl">📦</span>
+              <h3 class="mt-3 font-black text-sky-100">Picking y verificación</h3>
+              <p class="mt-2 text-xs leading-5 text-sky-100/65">Preparación FEFO con verificación independiente.</p>
+            </button>
+
+            <button data-modal="zone-dispatch" class="warehouse-zone col-span-2 rounded-2xl border border-teal-300/25 bg-teal-400/15 p-5 text-left">
+              <span class="text-3xl">→</span>
+              <h3 class="mt-3 font-black text-teal-100">Consolidación y despacho</h3>
+              <p class="mt-2 text-xs leading-5 text-teal-100/65">Pedido liberado y cargado en vehículo apto.</p>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-8 grid gap-5 md:grid-cols-3">
+          <div class="bounce-item glass rounded-2xl p-6">
+            <p class="text-3xl">🌡</p>
+            <h3 class="mt-4 text-lg font-black text-white">Control ambiental</h3>
+            <p class="mt-3 text-sm leading-6 text-slate-400">
+              Temperatura, humedad, tendencias, alarmas, calibración y excursiones.
+            </p>
+          </div>
+
+          <div class="bounce-item glass rounded-2xl p-6" style="--delay:120ms">
+            <p class="text-3xl">🔐</p>
+            <h3 class="mt-4 text-lg font-black text-white">Acceso controlado</h3>
+            <p class="mt-3 text-sm leading-6 text-slate-400">
+              Ingreso limitado, control de visitantes y protección de productos.
+            </p>
+          </div>
+
+          <div class="bounce-item glass rounded-2xl p-6" style="--delay:240ms">
+            <p class="text-3xl">🧯</p>
+            <h3 class="mt-4 text-lg font-black text-white">Seguridad</h3>
+            <p class="mt-3 text-sm leading-6 text-slate-400">
+              Incendios, mantenimiento, limpieza, plagas y continuidad operativa.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="estructura" class="section-reveal border-y border-white/10 bg-white/[.025] px-4 py-24 sm:px-6">
+      <div class="mx-auto max-w-7xl">
+        <div class="max-w-3xl">
+          <p class="text-sm font-black uppercase tracking-[.25em] text-cyan-300">04 · Estructura organizacional</p>
+          <h2 class="mt-4 text-3xl font-black text-white sm:text-5xl">
+            Equipo reducido, responsabilidades inequívocas
+          </h2>
+          <p class="mt-5 leading-8 text-slate-300">
+            La operación física, la autoridad sanitaria y la verificación deben mantener controles definidos y responsabilidades claramente separadas.
+          </p>
+        </div>
+
+        <div class="mt-12">
+          <div class="mx-auto max-w-md">
+            <button data-modal="role-admin" class="bounce-item glass w-full rounded-2xl border-emerald-300/25 p-5 text-left">
+              <span class="text-xs font-black uppercase tracking-[.2em] text-emerald-300">
+                Coordinación
+              </span>
+              <h3 class="mt-2 text-xl font-black text-white">
+                Administrador de bodega
+              </h3>
+              <p class="mt-2 text-sm text-slate-400">
+                Planifica recibos, inventario, pedidos, recursos e indicadores.
+              </p>
+            </button>
+          </div>
+
+          <div class="mx-auto h-10 w-px bg-gradient-to-b from-emerald-300 to-white/20"></div>
+
+          <div class="relative">
+            <div class="absolute left-[12.5%] right-[12.5%] top-0 hidden h-px bg-white/20 lg:block"></div>
+
+            <div class="grid gap-4 pt-0 lg:grid-cols-4 lg:pt-7">
+              <button data-modal="role-pharmacist" class="bounce-item glass relative rounded-2xl border-cyan-300/20 p-5 text-left">
+                <div class="absolute -top-7 left-1/2 hidden h-7 w-px -translate-x-1/2 bg-white/20 lg:block"></div>
+                <div class="text-3xl">⚕</div>
+                <h3 class="mt-4 font-black text-white">Regente farmacéutico</h3>
+                <p class="mt-2 text-sm leading-6 text-slate-400">
+                  Responsabilidad técnica y sanitaria efectiva.
+                </p>
+              </button>
+
+              <button data-modal="role-quality" class="bounce-item glass relative rounded-2xl border-emerald-300/20 p-5 text-left" style="--delay:100ms">
+                <div class="absolute -top-7 left-1/2 hidden h-7 w-px -translate-x-1/2 bg-white/20 lg:block"></div>
+                <div class="text-3xl">✓</div>
+                <h3 class="mt-4 font-black text-white">Calidad y documentación</h3>
+                <p class="mt-2 text-sm leading-6 text-slate-400">
+                  Procedimientos, registros, CAPA y autoinspecciones.
+                </p>
+              </button>
+
+              <button data-modal="role-operators" class="bounce-item glass relative rounded-2xl border-amber-300/20 p-5 text-left" style="--delay:200ms">
+                <div class="absolute -top-7 left-1/2 hidden h-7 w-px -translate-x-1/2 bg-white/20 lg:block"></div>
+                <div class="text-3xl">👷</div>
+                <h3 class="mt-4 font-black text-white">Dos operadores</h3>
+                <p class="mt-2 text-sm leading-6 text-slate-400">
+                  Recepción, ubicación, picking y verificación cruzada.
+                </p>
+              </button>
+
+              <button data-modal="role-driver" class="bounce-item glass relative rounded-2xl border-rose-300/20 p-5 text-left" style="--delay:300ms">
+                <div class="absolute -top-7 left-1/2 hidden h-7 w-px -translate-x-1/2 bg-white/20 lg:block"></div>
+                <div class="text-3xl">🚛</div>
+                <h3 class="mt-4 font-black text-white">Conductor o transportista</h3>
+                <p class="mt-2 text-sm leading-6 text-slate-400">
+                  Custodia, transporte y confirmación de entrega.
+                </p>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass mt-10 overflow-hidden rounded-2xl">
+          <div class="border-b border-white/10 p-6">
+            <h3 class="text-xl font-black text-white">Separación de funciones críticas</h3>
+            <p class="mt-2 text-sm text-slate-400">Quién ejecuta y quién verifica o autoriza.</p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[760px] text-left text-sm">
+              <thead class="bg-white/5 text-xs uppercase tracking-wider text-cyan-200">
+                <tr>
+                  <th class="px-6 py-4">Actividad</th>
+                  <th class="px-6 py-4">Ejecuta</th>
+                  <th class="px-6 py-4">Verifica / autoriza</th>
+                </tr>
+              </thead>
+
+              <tbody id="responsibilityTable" class="divide-y divide-white/10 text-slate-300"></tbody>
+            </table>
+          </div>
+
+          <div class="p-5">
+            <button type="button" data-modal="segregation" class="rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-5 py-3 text-sm font-bold text-cyan-100 hover:bg-cyan-300/20">
+              Ver matriz completa
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="calidad" class="section-reveal px-4 py-24 sm:px-6">
+      <div class="mx-auto max-w-7xl">
+        <div class="grid gap-12 lg:grid-cols-[.9fr_1.1fr]">
+          <div>
+            <p class="text-sm font-black uppercase tracking-[.25em] text-emerald-300">05 · Sistema de calidad</p>
+            <h2 class="mt-4 text-3xl font-black text-white sm:text-5xl">
+              La evidencia escrita sostiene la operación
+            </h2>
+
+            <p class="mt-5 leading-8 text-slate-300">
+              Si un control no está definido, ejecutado y registrado, no puede demostrarse ante el cliente ni ante la autoridad sanitaria.
+            </p>
+
+            <div class="mt-8 grid grid-cols-2 gap-4">
+              <div class="bounce-item glass rounded-2xl p-5">
+                <p class="text-4xl font-black text-cyan-300" data-count="38">0</p>
+                <p class="mt-2 text-sm text-slate-400">Procedimientos identificados</p>
+              </div>
+
+              <div class="bounce-item glass rounded-2xl p-5" style="--delay:130ms">
+                <p class="text-4xl font-black text-emerald-300" data-count="29">0</p>
+                <p class="mt-2 text-sm text-slate-400">Registros requeridos</p>
+              </div>
+            </div>
+
+            <button type="button" data-modal="documents" class="mt-5 w-full rounded-xl bg-emerald-400 px-5 py-3.5 font-black text-ink hover:bg-emerald-300">
+              Abrir inventario documental
+            </button>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <button data-modal="quality-document-control" class="bounce-item glass rounded-2xl p-6 text-left">
+              <span class="grid h-11 w-11 place-items-center rounded-xl bg-cyan-400/15 text-xl">📄</span>
+              <h3 class="mt-4 font-black text-white">Control documental</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-400">
+                Versiones, aprobación, distribución, archivo y obsolescencia.
+              </p>
+            </button>
+
+            <button data-modal="quality-deviations" class="bounce-item glass rounded-2xl p-6 text-left" style="--delay:100ms">
+              <span class="grid h-11 w-11 place-items-center rounded-xl bg-amber-400/15 text-xl">⚠</span>
+              <h3 class="mt-4 font-black text-white">Desviaciones y CAPA</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-400">
+                Contención, causa raíz, acciones y verificación de eficacia.
+              </p>
+            </button>
+
+            <button data-modal="quality-recall" class="bounce-item glass rounded-2xl p-6 text-left" style="--delay:200ms">
+              <span class="grid h-11 w-11 place-items-center rounded-xl bg-rose-400/15 text-xl">↶</span>
+              <h3 class="mt-4 font-black text-white">Retiro de mercado</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-400">
+                Localización rápida por producto, lote y destinatario.
+              </p>
+            </button>
+
+            <button data-modal="quality-audits" class="bounce-item glass rounded-2xl p-6 text-left" style="--delay:300ms">
+              <span class="grid h-11 w-11 place-items-center rounded-xl bg-emerald-400/15 text-xl">🔎</span>
+              <h3 class="mt-4 font-black text-white">Autoinspección</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-400">
+                Hallazgos, responsables, acciones y seguimiento.
+              </p>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-16">
+          <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p class="text-sm font-black uppercase tracking-[.2em] text-amber-200">Tablero inicial</p>
+              <h3 class="mt-2 text-2xl font-black text-white">Indicadores de estabilidad</h3>
+            </div>
+
+            <button type="button" data-modal="kpis" class="rounded-xl border border-amber-300/20 bg-amber-300/10 px-5 py-3 text-sm font-bold text-amber-100 hover:bg-amber-300/20">
+              Ver fórmulas
+            </button>
+          </div>
+
+          <div class="mt-7 grid gap-5 lg:grid-cols-2">
+            <div class="glass rounded-2xl p-6">
+              <h4 class="mb-6 font-black text-white">Desempeño operativo</h4>
+              <div id="operationalMetrics" class="space-y-6"></div>
+            </div>
+
+            <div class="glass rounded-2xl p-6">
+              <h4 class="mb-6 font-black text-white">Cumplimiento y calidad</h4>
+              <div id="qualityMetrics" class="space-y-6"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="implementacion" class="section-reveal border-y border-white/10 bg-white/[.025] px-4 py-24 sm:px-6">
+      <div class="mx-auto max-w-7xl">
+        <div class="max-w-3xl">
+          <p class="text-sm font-black uppercase tracking-[.25em] text-cyan-300">06 · Ruta de implementación</p>
+          <h2 class="mt-4 text-3xl font-black text-white sm:text-5xl">
+            Seis fases antes de la operación regular
+          </h2>
+
+          <p class="mt-5 leading-8 text-slate-300">
+            La secuencia reduce el riesgo de iniciar operaciones sin que el alcance sanitario esté claramente definido.
+          </p>
+        </div>
+
+        <div class="relative mt-12">
+          <div class="timeline-bar absolute left-4 top-5 hidden h-1 w-[calc(100%-2rem)] bg-gradient-to-r from-cyan-400 via-emerald-400 to-amber-300 lg:block"></div>
+          <div id="implementationPhases" class="relative grid gap-5 lg:grid-cols-6"></div>
+        </div>
+
+        <div class="glass mt-12 rounded-2xl p-6 sm:p-8">
+          <div class="grid gap-8 lg:grid-cols-[1fr_.8fr] lg:items-center">
+            <div>
+              <p class="text-sm font-black uppercase tracking-[.2em] text-emerald-300">Prueba piloto</p>
+              <h3 class="mt-3 text-2xl font-black text-white">
+                La operación debe probarse antes de autorizar el inicio regular
+              </h3>
+              <p class="mt-4 leading-7 text-slate-300">
+                Se validan el recibo, la trazabilidad, los registros, el picking FEFO, la entrega y la respuesta ante desviaciones.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-xl bg-cyan-400/10 p-4 text-center">
+                <p class="text-2xl font-black text-cyan-300">100%</p>
+                <p class="mt-1 text-xs text-slate-400">Lotes trazables</p>
+              </div>
+
+              <div class="rounded-xl bg-emerald-400/10 p-4 text-center">
+                <p class="text-2xl font-black text-emerald-300">0</p>
+                <p class="mt-1 text-xs text-slate-400">Despachos bloqueados</p>
+              </div>
+
+              <div class="rounded-xl bg-amber-400/10 p-4 text-center">
+                <p class="text-2xl font-black text-amber-200">FEFO</p>
+                <p class="mt-1 text-xs text-slate-400">Salida validada</p>
+              </div>
+
+              <div class="rounded-xl bg-rose-400/10 p-4 text-center">
+                <p class="text-2xl font-black text-rose-300">CAPA</p>
+                <p class="mt-1 text-xs text-slate-400">Brechas corregidas</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="regulacion" class="section-reveal px-4 py-24 sm:px-6">
+      <div class="mx-auto max-w-7xl">
+        <div class="grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
+          <div>
+            <p class="text-sm font-black uppercase tracking-[.25em] text-amber-200">07 · Marco regulatorio</p>
+            <h2 class="mt-4 text-3xl font-black text-white sm:text-5xl">
+              La licencia comercial no sustituye la autorización farmacéutica
+            </h2>
+
+            <p class="mt-5 leading-8 text-slate-300">
+              El alcance de almacenamiento, distribución y transporte debe estar autorizado por la Dirección Nacional de Farmacia y Drogas.
+            </p>
+
+            <button type="button" data-modal="license" class="mt-7 rounded-xl bg-amber-300 px-6 py-3.5 font-black text-ink hover:bg-amber-200">
+              Ver condiciones de licencia
+            </button>
+          </div>
+
+          <div id="legalCards" class="grid gap-4 sm:grid-cols-2"></div>
+        </div>
+
+        <div class="glass mt-12 rounded-2xl p-6 sm:p-8">
+          <h3 class="text-xl font-black text-white">
+            Condiciones antes de recibir el primer medicamento
+          </h3>
+
+          <div id="readinessChecklist" class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
+
+          <div class="mt-6 flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <p id="checklistStatus" class="text-sm text-slate-300">0 de 11 condiciones revisadas</p>
+
+            <button id="resetChecklist" type="button" class="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white hover:bg-white/10">
+              Reiniciar revisión
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-reveal px-4 pb-28 sm:px-6">
+      <div class="mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-cyan-300/20 bg-gradient-to-br from-cyan-400/15 via-emerald-400/10 to-amber-300/10 p-7 shadow-glow sm:p-12">
+        <div class="grid gap-10 lg:grid-cols-[1.25fr_.75fr] lg:items-center">
+          <div>
+            <p class="text-sm font-black uppercase tracking-[.25em] text-cyan-200">Recomendación ejecutiva</p>
+            <h2 class="mt-4 text-3xl font-black text-white sm:text-5xl">
+              Autorizar un inicio controlado, no un inicio apresurado
+            </h2>
+
+            <p class="mt-5 max-w-3xl text-lg leading-8 text-slate-200">
+              La estructura propuesta es suficiente para el volumen inicial si la licencia, la regencia, las áreas, el sistema de calidad, la trazabilidad y la capacitación están implementados.
+            </p>
+
+            <div class="mt-7 flex flex-wrap gap-3">
+              <span class="rounded-full bg-white/10 px-4 py-2 text-sm">1 cliente inicial</span>
+              <span class="rounded-full bg-white/10 px-4 py-2 text-sm">2 operadores</span>
+              <span class="rounded-full bg-white/10 px-4 py-2 text-sm">1 administrador de bodega</span>
+              <span class="rounded-full bg-white/10 px-4 py-2 text-sm">1 regente</span>
+              <span class="rounded-full bg-white/10 px-4 py-2 text-sm">1 responsable de calidad</span>
+            </div>
+          </div>
+
+          <div class="glass rounded-2xl p-6">
+            <p class="text-xs font-black uppercase tracking-[.2em] text-emerald-300">Escalamiento posterior</p>
+
+            <ul class="mt-5 space-y-3 text-sm text-slate-300">
+              <li>＋ Nuevos clientes y rutas</li>
+              <li>＋ Mayor capacidad de almacenamiento</li>
+              <li>＋ Horarios ampliados</li>
+              <li>＋ Cadena de frío calificada</li>
+              <li>＋ Servicios logísticos adicionales</li>
+            </ul>
+
+            <button type="button" data-modal="growth" class="mt-6 w-full rounded-xl bg-cyan-400 px-5 py-3 font-black text-ink hover:bg-cyan-300">
+              Ver disparadores de crecimiento
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 px-4 py-10 sm:px-6">
+    <div class="mx-auto flex max-w-7xl flex-col gap-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p class="font-bold text-slate-300">FCI Logistics · Proyecto de operación farmacéutica</p>
+        <p class="mt-1">Parque Sur, Panamá</p>
+      </div>
+
+      <button type="button" data-modal="sources" class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 font-bold text-slate-300 hover:bg-white/10">
+        Fuentes legales y técnicas
+      </button>
+    </div>
+  </footer>
+
+  <div id="modal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div id="modalBackdrop" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
+
+    <div class="relative flex min-h-full items-end justify-center sm:items-center sm:p-6">
+      <div class="glass relative max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-t-3xl border border-white/15 sm:rounded-3xl">
+        <div class="flex items-start justify-between border-b border-white/10 p-5 sm:p-7">
+          <div class="pr-5">
+            <p id="modalEyebrow" class="text-xs font-black uppercase tracking-[.22em] text-cyan-300"></p>
+            <h2 id="modalTitle" class="mt-2 text-2xl font-black text-white sm:text-3xl"></h2>
+          </div>
+
+          <button id="modalClose" type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/5 text-2xl text-slate-300 hover:bg-white/10" aria-label="Cerrar">
+            ×
+          </button>
+        </div>
+
+        <div id="modalContent" class="modal-scroll max-h-[calc(92vh-110px)] overflow-y-auto p-5 sm:p-7"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const processes = [
+      ["01", "Programación del recibo", "Confirmar fecha, hora, proveedor, cliente, productos, cantidades, conservación y documentos.", "No recibir cargas no programadas sin autorización."],
+      ["02", "Inspección del vehículo y la carga", "Revisar limpieza, integridad, sellos, pallets, cajas, temperatura y posibles contaminantes.", "Documentar anomalías antes de descargar."],
+      ["03", "Verificación documental", "Comparar documentos con producto, cantidades, lotes, vencimientos y condiciones.", "Toda diferencia debe quedar registrada."],
+      ["04", "Recepción y registro", "Registrar cliente, producto, cantidad, lote, vencimiento, estado, ubicación y responsable.", "Asignar identidad trazable desde el ingreso."],
+      ["05", "Cuarentena", "Ubicar el producto en área segregada y con estado bloqueado.", "Cuarentena no equivale a producto disponible."],
+      ["06", "Cambio de estado", "Cambiar el inventario a disponible, bloqueado o rechazado mediante usuario autorizado.", "Registrar usuario, fecha y justificación."],
+      ["07", "Ubicación y almacenamiento", "Trasladar a una posición identificada, limpia, segura y compatible.", "Nada directamente sobre piso o paredes."],
+      ["08", "Control de inventario y FEFO", "Mantener exactitud por cliente, producto, lote, vencimiento, estado y ubicación.", "Priorizar el vencimiento más próximo."],
+      ["09", "Preparación del pedido", "Seleccionar únicamente inventario disponible siguiendo el pedido y FEFO.", "Impedir seleccionar inventario bloqueado."],
+      ["10", "Verificación independiente", "Confirmar producto, cantidad, lote, vencimiento, empaque, documentos y destino.", "Quien verifica no debe preparar."],
+      ["11", "Consolidación y despacho", "Proteger, identificar y cargar el pedido en un vehículo previamente inspeccionado.", "Solo pedidos liberados pasan a despacho."],
+      ["12", "Distribución y entrega", "Mantener custodia y condiciones hasta entregar a un establecimiento autorizado.", "Registrar entrega o novedad."],
+      ["13", "Devoluciones y cierre", "Segregar y evaluar devoluciones antes de decidir reintegro, rechazo o disposición.", "Nunca reincorporar automáticamente."]
+    ];
+
+    const responsibilities = [
+      ["Recepción física", "Operadores", "Administrador de bodega"],
+      ["Revisión técnica", "Operadores / administrador", "Regente o calidad"],
+      ["Registro en sistema", "Administrador de bodega", "Calidad"],
+      ["Cambio a disponible", "Usuario autorizado", "Regente / calidad"],
+      ["Picking", "Operador 1", "Operador 2"],
+      ["Liberación del pedido", "Administrador de bodega", "Verificador autorizado"],
+      ["Evaluación de devolución", "Operación", "Regente / calidad"],
+      ["Ajuste de inventario", "Administrador de bodega", "Calidad"],
+      ["Despacho", "Operadores", "Administrador de bodega"],
+      ["Transporte", "Conductor", "Administrador / cliente"]
+    ];
+
+    const phases = [
+      ["01", "Diagnóstico", "Confirmar alcance legal y operativo.", "phase-diagnosis", "cyan"],
+      ["02", "Diseño", "Definir flujo, áreas, equipo y documentos.", "phase-design", "sky"],
+      ["03", "Adecuación", "Preparar infraestructura y monitoreo.", "phase-adaptation", "emerald"],
+      ["04", "Calidad", "Aprobar SOP, formatos y capacitación.", "phase-quality", "teal"],
+      ["05", "Licenciamiento", "Solicitar, inspeccionar y corregir.", "phase-license", "amber"],
+      ["06", "Inicio controlado", "Ejecutar piloto y autorizar operación regular.", "phase-pilot", "rose"]
+    ];
+
+    const legalCards = [
+      ["NORMA PRINCIPAL", "Ley 419 de 2024", "Regula medicamentos, establecimientos, almacenamiento, distribución y transporte.", "law419"],
+      ["REGLAMENTACIÓN", "Decreto Ejecutivo 27", "Desarrolla licencias, regencia, infraestructura, personal y Buenas Prácticas.", "decree27"],
+      ["CORRECCIÓN OFICIAL", "Fe de Errata", "Debe revisarse junto con el Decreto Ejecutivo 27.", "errata"],
+      ["PROCEDIMIENTO", "Resolución 181 de 2025", "Establece el procedimiento de aprobación de las Buenas Prácticas.", "resolution181"],
+      ["EVALUACIÓN", "Guía de Buenas Prácticas", "Apoya el diagnóstico, autoinspección y preparación sanitaria.", "evaluation-guide"],
+      ["AUTORIDAD", "DNFD · MINSA", "Autoriza, inspecciona y supervisa el alcance farmacéutico.", "dnfd"]
+    ];
+
+    const checklist = [
+      "Licencia de operación vigente",
+      "Dirección de Parque Sur autorizada",
+      "Almacenamiento de medicamentos autorizado",
+      "Distribución y transporte autorizados cuando apliquen",
+      "Regente farmacéutico designado",
+      "Áreas segregadas y señalizadas",
+      "Sistema documental aprobado",
+      "Personal capacitado",
+      "Monitoreo ambiental implementado",
+      "Trazabilidad por lote y vencimiento",
+      "Acuerdo de calidad firmado"
+    ];
+
+    const operationalMetrics = [
+      ["Recepciones sin diferencias", 98, "#22d3ee"],
+      ["Pedidos preparados a tiempo", 96, "#34d399"],
+      ["Exactitud del picking", 99.5, "#fbbf24"],
+      ["Exactitud de inventario", 99.7, "#fb7185"]
+    ];
+
+    const qualityMetrics = [
+      ["Cumplimiento de temperatura", 100, "#34d399"],
+      ["Capacitación vigente", 100, "#22d3ee"],
+      ["Calibraciones cumplidas", 100, "#fbbf24"],
+      ["Desviaciones cerradas a tiempo", 95, "#fb7185"]
+    ];
+
+    const modalData = {
+      project: {
+        eyebrow: "Ficha ejecutiva",
+        title: "Proyecto de operación farmacéutica",
+        intro: "Operación inicial controlada y escalable para almacenar y distribuir medicamentos de terceros.",
+        facts: [
+          ["Empresa", "FCI Logistics"],
+          ["Ubicación", "Parque Sur, Panamá"],
+          ["Volumen", "2 contenedores mensuales y hasta 5 pedidos diarios"],
+          ["Inicio recomendado", "Un cliente y medicamentos de temperatura ambiente controlada"],
+          ["Principio", "FEFO y trazabilidad por lote y vencimiento"]
+        ]
+      },
+
+      traceability: {
+        eyebrow: "Control de información",
+        title: "Trazabilidad de extremo a extremo",
+        items: ["Cliente", "Producto y presentación", "Cantidad", "Lote", "Vencimiento", "Estado", "Ubicación", "Usuario y fecha", "Pedido, vehículo y destinatario"]
+      },
+
+      included: {
+        eyebrow: "Alcance inicial",
+        title: "Actividades incluidas",
+        items: ["Programación de recibos", "Recepción de contenedores", "Recepción de carga suelta", "Inspección", "Verificación documental", "Registro de lotes y vencimientos", "Cuarentena", "Almacenamiento", "Control ambiental", "Inventarios", "Picking", "Verificación", "Consolidación", "Carga", "Distribución", "Devoluciones", "Rechazados y vencidos"]
+      },
+
+      excluded: {
+        eyebrow: "Gestión de riesgos",
+        title: "Actividades posteriores",
+        items: ["Narcóticos", "Psicotrópicos", "Precursores químicos", "Medicamentos congelados", "Reempaque", "Reetiquetado", "Fraccionamiento", "Acondicionamiento", "Manufactura", "Dispensación", "Destrucción interna"]
+      },
+
+      coldchain: {
+        eyebrow: "Ampliación técnica",
+        title: "Requisitos de cadena de frío",
+        items: ["Equipo autorizado", "Calificación", "Mapeo térmico", "Monitoreo continuo", "Alarmas", "Respaldo eléctrico", "Contingencias", "Empaques calificados", "Procedimientos", "Personal capacitado"]
+      },
+
+      status: {
+        eyebrow: "Inventario",
+        title: "Estados sanitarios",
+        facts: [
+          ["Cuarentena", "Recibido, pero no autorizado."],
+          ["Disponible", "Autorizado para pedidos."],
+          ["Bloqueado", "Restringido por investigación."],
+          ["Rechazado", "Producto no conforme."],
+          ["Devuelto", "Pendiente de evaluación."],
+          ["Vencido", "Fuera de su vida útil."]
+        ]
+      },
+
+      "zone-reception": {
+        eyebrow: "Zona operativa",
+        title: "Recepción e inspección",
+        items: ["Área protegida", "Inspección de vehículo", "Revisión de sellos", "Conteo", "Control de daños", "Registro de temperatura cuando aplique"]
+      },
+
+      "zone-quarantine": {
+        eyebrow: "Zona restringida",
+        title: "Cuarentena",
+        items: ["Identificación visible", "Acceso controlado", "Segregación", "Bloqueo en sistema", "Prohibición de picking", "Cambio autorizado"]
+      },
+
+      "zone-rejected": {
+        eyebrow: "Zona segregada",
+        title: "Productos rechazados",
+        items: ["Bloqueo", "Segregación", "Registro de causa", "Evaluación técnica", "Notificación al cliente", "Disposición documentada"]
+      },
+
+      "zone-storage": {
+        eyebrow: "Zona principal",
+        title: "Almacenamiento disponible",
+        items: ["Racks identificados", "Separación del piso y paredes", "Trazabilidad", "Monitoreo ambiental", "FEFO", "Limpieza", "Recuentos cíclicos", "Acceso controlado"]
+      },
+
+      "zone-expired": {
+        eyebrow: "Zona segregada",
+        title: "Productos vencidos",
+        items: ["Bloqueo inmediato", "Segregación", "Conciliación", "Notificación", "Custodia", "Disposición final"]
+      },
+
+      "zone-returns": {
+        eyebrow: "Zona de evaluación",
+        title: "Devoluciones",
+        items: ["Recibo separado", "Registro del motivo", "Verificación de integridad", "Historial de conservación", "Evaluación del regente o calidad", "Decisión documentada"]
+      },
+
+      "zone-picking": {
+        eyebrow: "Zona operativa",
+        title: "Picking y verificación",
+        items: ["Pedido autorizado", "Inventario disponible", "FEFO", "Vida útil mínima", "Registro de lote", "Verificación independiente"]
+      },
+
+      "zone-dispatch": {
+        eyebrow: "Zona operativa",
+        title: "Consolidación y despacho",
+        items: ["Separación por cliente", "Liberación", "Inspección del vehículo", "Protección", "Registro de conductor", "Confirmación de entrega"]
+      },
+
+      "role-admin": {
+        eyebrow: "Coordinación",
+        title: "Administrador de bodega",
+        items: ["Programar recibos y despachos", "Coordinar espacio", "Asignar tareas", "Supervisar inventarios", "Gestionar diferencias", "Coordinar transportistas", "Revisar indicadores", "Coordinar auditorías", "Impedir movimientos de productos bloqueados"]
+      },
+
+      "role-pharmacist": {
+        eyebrow: "Responsabilidad sanitaria",
+        title: "Regente farmacéutico",
+        items: ["Supervisión técnica", "Aprobar procedimientos", "Supervisar cuarentena", "Evaluar devoluciones", "Revisar excursiones", "Participar en CAPA", "Atender inspecciones", "Capacitar al personal"]
+      },
+
+      "role-quality": {
+        eyebrow: "Sistema de gestión",
+        title: "Calidad y documentación",
+        items: ["Control documental", "Lista maestra", "Revisión de registros", "Desviaciones", "CAPA", "Autoinspecciones", "Capacitación", "Calibración", "Mantenimiento", "Control de plagas"]
+      },
+
+      "role-operators": {
+        eyebrow: "Ejecución física",
+        title: "Operadores de bodega",
+        items: ["Descarga", "Inspección", "Conteo", "Verificación de etiquetas", "Ubicación", "Picking FEFO", "Verificación cruzada", "Consolidación y carga"]
+      },
+
+      "role-driver": {
+        eyebrow: "Distribución",
+        title: "Conductor o transportista",
+        items: ["Vehículo apto", "Custodia", "Condiciones de transporte", "Ruta autorizada", "Entrega", "Registro de novedades", "Retorno de documentos"]
+      },
+
+      segregation: {
+        eyebrow: "Control interno",
+        title: "Separación de funciones",
+        items: ["Operador 1 prepara y Operador 2 verifica", "Operación recibe y regente o calidad evalúa", "Usuario autorizado cambia estado", "Administrador solicita ajustes y calidad verifica", "Conductor transporta y destinatario confirma"]
+      },
+
+      documents: {
+        eyebrow: "Sistema documental",
+        title: "Procedimientos y registros",
+        items: ["Recepción", "Inspección", "Cuarentena", "Cambio de estado", "Almacenamiento", "Temperatura", "Inventario", "FEFO", "Picking", "Verificación", "Despacho", "Transporte", "Devoluciones", "Vencidos", "Recall", "Desviaciones", "CAPA", "Calibración", "Mantenimiento", "Autoinspecciones"]
+      },
+
+      "quality-document-control": {
+        eyebrow: "Sistema de calidad",
+        title: "Control documental",
+        items: ["Código", "Versión", "Aprobación", "Vigencia", "Lista maestra", "Distribución", "Obsolescencia", "Archivo", "Control de cambios"]
+      },
+
+      "quality-deviations": {
+        eyebrow: "Mejora continua",
+        title: "Desviaciones y CAPA",
+        facts: [
+          ["Desviación", "Incumplimiento de un requisito."],
+          ["Contención", "Control inmediato del impacto."],
+          ["Investigación", "Determinación de causa raíz."],
+          ["Acción correctiva", "Previene recurrencia."],
+          ["Eficacia", "Confirma el resultado."]
+        ]
+      },
+
+      "quality-recall": {
+        eyebrow: "Respuesta crítica",
+        title: "Retiro de mercado",
+        items: ["Bloquear el lote", "Identificar inventario", "Localizar clientes", "Comunicar", "Recuperar", "Conciliar cantidades", "Emitir informe", "Conservar evidencia"]
+      },
+
+      "quality-audits": {
+        eyebrow: "Verificación",
+        title: "Autoinspecciones",
+        items: ["Programa", "Lista de verificación", "Auditor", "Hallazgos", "Responsables", "Fechas", "CAPA", "Seguimiento"]
+      },
+
+      kpis: {
+        eyebrow: "Tablero",
+        title: "Fórmulas de indicadores",
+        facts: [
+          ["Exactitud de inventario", "Unidades correctas ÷ unidades verificadas × 100."],
+          ["Exactitud de picking", "Líneas sin error ÷ líneas preparadas × 100."],
+          ["Pedidos a tiempo", "Pedidos en plazo ÷ pedidos totales × 100."],
+          ["Cumplimiento ambiental", "Lecturas en rango ÷ lecturas totales × 100."],
+          ["Capacitación", "Personal vigente ÷ personal requerido × 100."]
+        ]
+      },
+
+      "phase-diagnosis": {
+        eyebrow: "Fase 1",
+        title: "Diagnóstico",
+        items: ["Revisar licencia", "Confirmar dirección", "Confirmar alcance", "Designar regente", "Identificar productos", "Revisar contrato", "Analizar brechas"]
+      },
+
+      "phase-design": {
+        eyebrow: "Fase 2",
+        title: "Diseño",
+        items: ["Preparar plano", "Definir flujo", "Delimitar áreas", "Definir posiciones", "Diseñar organigrama", "Preparar procedimientos", "Definir indicadores"]
+      },
+
+      "phase-adaptation": {
+        eyebrow: "Fase 3",
+        title: "Adecuación",
+        items: ["Verificar racks", "Señalizar", "Preparar cuarentena", "Preparar devoluciones", "Instalar monitoreo", "Verificar incendios", "Controlar acceso"]
+      },
+
+      "phase-quality": {
+        eyebrow: "Fase 4",
+        title: "Sistema de calidad",
+        items: ["Aprobar manual", "Aprobar procedimientos", "Implementar formatos", "Capacitar", "Probar trazabilidad", "Probar recall", "Autoinspeccionar"]
+      },
+
+      "phase-license": {
+        eyebrow: "Fase 5",
+        title: "Licenciamiento",
+        items: ["Presentar solicitud", "Entregar documentos", "Recibir inspección", "Responder observaciones", "Ejecutar CAPA", "Obtener autorización"]
+      },
+
+      "phase-pilot": {
+        eyebrow: "Fase 6",
+        title: "Inicio controlado",
+        items: ["Primer embarque", "Validar tiempos", "Revisar registros", "Confirmar trazabilidad", "Preparar pedidos", "Revisar entregas", "Corregir brechas"]
+      },
+
+      license: {
+        eyebrow: "Autorización sanitaria",
+        title: "Condiciones de licencia",
+        items: ["Licencia vigente", "Dirección correcta", "Área física incluida", "Almacenamiento autorizado", "Distribución autorizada", "Transporte autorizado cuando aplique", "Regente identificado", "Categorías correctas"]
+      },
+
+      law419: {
+        eyebrow: "Panamá",
+        title: "Ley 419 de 2024",
+        items: ["Importación", "Almacenamiento", "Distribución", "Transporte", "Comercialización", "Vigilancia sanitaria", "Establecimientos", "Responsabilidades"],
+        link: "https://www.minsa.gob.pa/normatividad/ley-419-de-1-de-febrero-de-2024-que-regula-los-medicamentos-y-otros-productos-para-la"
+      },
+
+      decree27: {
+        eyebrow: "Panamá",
+        title: "Decreto Ejecutivo 27 de 2024",
+        items: ["Licencias", "Regencia", "Infraestructura", "Personal", "Almacenamiento", "Distribución", "Transporte", "Cadena de frío", "Documentación"],
+        link: "https://www.minsa.gob.pa/sites/default/files/general/decreto_ejecutivo_27_de_10_de_mayo_de_2024.pdf"
+      },
+
+      errata: {
+        eyebrow: "Corrección oficial",
+        title: "Fe de Errata",
+        intro: "Debe revisarse junto con el Decreto Ejecutivo 27.",
+        link: "https://www.minsa.gob.pa/normatividad/fe-de-errata-decreto-ejecutivo-ndeg-27-de-viernes-10-de-mayo-de-2024-que-reglamenta-la"
+      },
+
+      resolution181: {
+        eyebrow: "Procedimiento",
+        title: "Resolución 181 de 2025",
+        items: ["Expediente", "Solicitud", "Evaluación", "Observaciones", "Aprobación"],
+        link: "https://www.minsa.gob.pa/normatividad/resolucion-ndeg-181-de-jueves-14-de-agosto-de-2025-que-establece-el-procedimiento-para"
+      },
+
+      "evaluation-guide": {
+        eyebrow: "Evaluación",
+        title: "Guía de Buenas Prácticas",
+        items: ["Diseño", "Diagnóstico", "Documentación", "Autoinspección", "Preparación para auditoría"],
+        link: "https://www.minsa.gob.pa/contenido/departamento-de-auditorias-de-calidad"
+      },
+
+      dnfd: {
+        eyebrow: "Autoridad sanitaria",
+        title: "Dirección Nacional de Farmacia y Drogas",
+        items: ["Solicitudes", "Licencias", "Inspecciones", "Buenas Prácticas", "Regencia", "Supervisión"]
+      },
+
+      growth: {
+        eyebrow: "Escalamiento",
+        title: "Cuándo revisar la estructura",
+        items: ["Más de 10 pedidos diarios", "Más de 4 cargas diarias", "Varios clientes", "Horarios ampliados", "Cadena de frío", "Productos controlados", "Más posiciones de pallet", "Nuevas rutas"]
+      },
+
+      sources: {
+        eyebrow: "Referencias",
+        title: "Fuentes legales y técnicas",
+        links: [
+          ["Ley 419 de 2024", "https://www.minsa.gob.pa/normatividad/ley-419-de-1-de-febrero-de-2024-que-regula-los-medicamentos-y-otros-productos-para-la"],
+          ["Decreto Ejecutivo 27", "https://www.minsa.gob.pa/sites/default/files/general/decreto_ejecutivo_27_de_10_de_mayo_de_2024.pdf"],
+          ["Resolución 181 de 2025", "https://www.minsa.gob.pa/normatividad/resolucion-ndeg-181-de-jueves-14-de-agosto-de-2025-que-establece-el-procedimiento-para"],
+          ["Guía de Buenas Prácticas", "https://www.minsa.gob.pa/contenido/departamento-de-auditorias-de-calidad"],
+          ["Licencia de agencias de distribución", "https://www.panamadigital.gob.pa/InformacionTramite/licencia-de-operacion-de-agencias-de-distribucion"]
+        ]
+      }
+    };
+
+    const colorClasses = {
+      cyan: "border-cyan-300/25 bg-cyan-400/10 text-cyan-200",
+      sky: "border-sky-300/25 bg-sky-400/10 text-sky-200",
+      emerald: "border-emerald-300/25 bg-emerald-400/10 text-emerald-200",
+      teal: "border-teal-300/25 bg-teal-400/10 text-teal-200",
+      amber: "border-amber-300/25 bg-amber-400/10 text-amber-200",
+      rose: "border-rose-300/25 bg-rose-400/10 text-rose-200"
+    };
+
+    function renderProcesses() {
+      document.getElementById("processFlow").innerHTML = processes.map((process, index) => `
+        <article class="flow-line bounce-item relative pl-20" style="--delay:${Math.min(index * 45, 350)}ms">
+          <div class="absolute left-0 top-1 z-10 grid h-14 w-14 place-items-center rounded-2xl border border-cyan-300/25 bg-[#0d3243] text-sm font-black text-cyan-300">
+            ${process[0]}
+          </div>
+
+          <div class="glass rounded-2xl p-5 sm:p-6">
+            <h3 class="text-lg font-black text-white">${process[1]}</h3>
+            <p class="mt-2 text-sm leading-7 text-slate-300">${process[2]}</p>
+            <p class="mt-3 text-xs font-bold text-emerald-300">CONTROL: ${process[3]}</p>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderResponsibilities() {
+      document.getElementById("responsibilityTable").innerHTML = responsibilities.map(row => `
+        <tr class="hover:bg-white/[.035]">
+          <td class="px-6 py-4 font-bold text-white">${row[0]}</td>
+          <td class="px-6 py-4">${row[1]}</td>
+          <td class="px-6 py-4 text-emerald-200">${row[2]}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderPhases() {
+      document.getElementById("implementationPhases").innerHTML = phases.map((phase, index) => `
+        <button data-modal="${phase[3]}" class="bounce-item relative rounded-2xl border p-5 text-left transition hover:-translate-y-1 ${colorClasses[phase[4]]}" style="--delay:${index * 90}ms">
+          <span class="grid h-10 w-10 place-items-center rounded-full bg-ink text-sm font-black">${phase[0]}</span>
+          <h3 class="mt-5 font-black text-white">${phase[1]}</h3>
+          <p class="mt-2 text-xs leading-5 text-slate-300">${phase[2]}</p>
+        </button>
+      `).join("");
+    }
+
+    function renderLegalCards() {
+      document.getElementById("legalCards").innerHTML = legalCards.map((item, index) => `
+        <button data-modal="${item[3]}" class="bounce-item glass rounded-2xl p-5 text-left transition hover:-translate-y-1" style="--delay:${index * 75}ms">
+          <span class="text-[10px] font-black uppercase tracking-[.2em] text-cyan-300">${item[0]}</span>
+          <h3 class="mt-2 text-lg font-black text-white">${item[1]}</h3>
+          <p class="mt-3 text-sm leading-6 text-slate-400">${item[2]}</p>
+          <span class="mt-4 inline-block text-xs font-bold text-emerald-300">Ampliar →</span>
+        </button>
+      `).join("");
+    }
+
+    function renderMetrics(id, data) {
+      document.getElementById(id).innerHTML = data.map(metric => `
+        <div>
+          <div class="mb-2 flex items-center justify-between gap-4">
+            <span class="text-sm text-slate-300">${metric[0]}</span>
+            <span class="text-sm font-black text-white">${metric[1]}%</span>
+          </div>
+
+          <div class="h-2.5 overflow-hidden rounded-full bg-white/10">
+            <div class="metric-bar h-full rounded-full" style="--value:${metric[1]}%;background:${metric[2]}"></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderChecklist() {
+      document.getElementById("readinessChecklist").innerHTML = checklist.map(item => `
+        <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4 hover:border-emerald-300/30">
+          <input type="checkbox" class="readiness-check mt-0.5 h-5 w-5 accent-emerald-400">
+          <span class="text-sm leading-6 text-slate-300">${item}</span>
+        </label>
+      `).join("");
+
+      document.querySelectorAll(".readiness-check").forEach(check => {
+        check.addEventListener("change", updateChecklist);
+      });
+    }
+
+    function updateChecklist() {
+      const checks = [...document.querySelectorAll(".readiness-check")];
+      const completed = checks.filter(check => check.checked).length;
+      const status = document.getElementById("checklistStatus");
+
+      status.textContent = `${completed} de ${checks.length} condiciones revisadas`;
+      status.className = completed === checks.length
+        ? "text-sm font-black text-emerald-300"
+        : "text-sm text-slate-300";
+    }
+
+    function renderModalBody(data) {
+      let html = "";
+
+      if (data.intro) {
+        html += `<p class="text-base leading-8 text-slate-300">${data.intro}</p>`;
+      }
+
+      if (data.facts) {
+        html += `
+          <div class="mt-6 overflow-hidden rounded-2xl border border-white/10">
+            ${data.facts.map(fact => `
+              <div class="grid gap-2 border-b border-white/10 p-4 last:border-0 sm:grid-cols-[.34fr_.66fr]">
+                <p class="text-sm font-black text-cyan-200">${fact[0]}</p>
+                <p class="text-sm leading-6 text-slate-300">${fact[1]}</p>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      }
+
+      if (data.items) {
+        html += `
+          <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+            ${data.items.map(item => `
+              <li class="flex gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-slate-300">
+                <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-emerald-400"></span>
+                <span>${item}</span>
+              </li>
+            `).join("")}
+          </ul>
+        `;
+      }
+
+      if (data.links) {
+        html += `
+          <div class="grid gap-3">
+            ${data.links.map(link => `
+              <a href="${link[1]}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4 text-sm font-bold text-cyan-100 hover:bg-cyan-300/10">
+                <span>${link[0]}</span>
+                <span>↗</span>
+              </a>
+            `).join("")}
+          </div>
+        `;
+      }
+
+      if (data.link) {
+        html += `
+          <a href="${data.link}" target="_blank" rel="noopener noreferrer" class="mt-6 inline-flex rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-ink hover:bg-cyan-300">
+            Consultar fuente oficial ↗
+          </a>
+        `;
+      }
+
+      return html;
+    }
+
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalEyebrow = document.getElementById("modalEyebrow");
+    const modalContent = document.getElementById("modalContent");
+    const modalClose = document.getElementById("modalClose");
+
+    function openModal(id) {
+      const data = modalData[id];
+      if (!data) return;
+
+      modalEyebrow.textContent = data.eyebrow || "Información";
+      modalTitle.textContent = data.title;
+      modalContent.innerHTML = renderModalBody(data);
+      modal.classList.remove("hidden");
+      document.body.classList.add("modal-open");
+      modalClose.focus();
+    }
+
+    function closeModal() {
+      modal.classList.add("hidden");
+      document.body.classList.remove("modal-open");
+    }
+
+    document.addEventListener("click", event => {
+      const trigger = event.target.closest("[data-modal]");
+      if (trigger) openModal(trigger.dataset.modal);
+    });
+
+    modalClose.addEventListener("click", closeModal);
+    document.getElementById("modalBackdrop").addEventListener("click", closeModal);
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeModal();
+    });
+
+    function animateCounter(element) {
+      if (element.dataset.animated === "true") return;
+      element.dataset.animated = "true";
+
+      const target = Number(element.dataset.count);
+      const duration = 1000;
+      const start = performance.now();
+
+      function update(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const value = target * (1 - Math.pow(1 - progress, 3));
+        element.textContent = Math.round(value);
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          element.textContent = target;
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    function setupObservers() {
+      const sectionObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      }, { threshold: .12 });
+
+      document.querySelectorAll(".section-reveal").forEach(section => {
+        sectionObserver.observe(section);
+      });
+
+      const bounceObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("bounce-in");
+            entry.target.querySelectorAll("[data-count]").forEach(animateCounter);
+            bounceObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: .15 });
+
+      document.querySelectorAll(".bounce-item").forEach(item => {
+        bounceObserver.observe(item);
+      });
+    }
+
+    function updateScrollProgress() {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollable > 0 ? window.scrollY / scrollable * 100 : 0;
+      document.getElementById("scrollProgress").style.width = `${progress}%`;
+    }
+
+    function updateActiveNav() {
+      const sectionIds = ["alcance", "proceso", "infraestructura", "estructura", "calidad", "implementacion"];
+      let current = "";
+
+      sectionIds.forEach(id => {
+        const section = document.getElementById(id);
+        if (section.getBoundingClientRect().top <= 150) current = id;
+      });
+
+      document.querySelectorAll(".nav-link").forEach(link => {
+        link.classList.toggle("active", link.getAttribute("href") === `#${current}`);
+      });
+    }
+
+    const menuButton = document.getElementById("menuButton");
+    const mobileNav = document.getElementById("mobileNav");
+
+    menuButton.addEventListener("click", () => {
+      const open = !mobileNav.classList.contains("hidden");
+      mobileNav.classList.toggle("hidden");
+      menuButton.setAttribute("aria-expanded", String(!open));
+    });
+
+    document.querySelectorAll(".mobile-link").forEach(link => {
+      link.addEventListener("click", () => {
+        mobileNav.classList.add("hidden");
+        menuButton.setAttribute("aria-expanded", "false");
+      });
+    });
+
+    document.getElementById("resetChecklist").addEventListener("click", () => {
+      document.querySelectorAll(".readiness-check").forEach(check => {
+        check.checked = false;
+      });
+
+      updateChecklist();
+    });
+
+    window.addEventListener("scroll", () => {
+      updateScrollProgress();
+      updateActiveNav();
+    }, { passive: true });
+
+    renderProcesses();
+    renderResponsibilities();
+    renderPhases();
+    renderLegalCards();
+    renderMetrics("operationalMetrics", operationalMetrics);
+    renderMetrics("qualityMetrics", qualityMetrics);
+    renderChecklist();
+    setupObservers();
+    updateScrollProgress();
+    updateActiveNav();
+  </script>
+</body>
+</html>
